@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8"/>
+<title>SVFB</title>
+</head>
+<body>
+
+<h1>Rede Social SVFB</h1>
+
+<div>
+  <h2>Cadastro</h2>
+  <input id="regUser" placeholder="Usuário"/>
+  <input id="regPass" placeholder="Senha" type="password"/>
+  <button onclick="register()">Cadastrar</button>
+</div>
+
+<div>
+  <h2>Login</h2>
+  <input id="logUser" placeholder="Usuário"/>
+  <input id="logPass" placeholder="Senha" type="password"/>
+  <button onclick="login()">Entrar</button>
+</div>
+
+<div>
+  <h2>Postar Scrap/Post</h2>
+  <input id="postContent" placeholder="Escreva algo..."/>
+  <button onclick="sendPost()">Enviar</button>
+</div>
+
+<div>
+  <h2>Posts da comunidade</h2>
+  <button onclick="loadPosts()">Carregar Posts</button>
+  <ul id="postsList"></ul>
+</div>
+
+<script>
+let token = "";
+
+async function register() {
+  const username = document.getElementById("regUser").value;
+  const password = document.getElementById("regPass").value;
+
+  const res = await fetch('/register', {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+  alert(data.message || data.error);
+}
+
+async function login() {
+  const username = document.getElementById("logUser").value;
+  const password = document.getElementById("logPass").value;
+
+  const res = await fetch('/login', {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+  const data = await res.json();
+  if (data.token) {
+    token = data.token;
+    alert("Login feito!");
+  } else {
+    alert(data.error);
+  }
+}
+
+async function sendPost() {
+  const content = document.getElementById("postContent").value;
+  const res = await fetch('/post', {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({ content })
+  });
+  const data = await res.json();
+  alert(data.message || data.error);
+}
+
+async function loadPosts() {
+  const res = await fetch('/posts');
+  const data = await res.json();
+  const list = document.getElementById("postsList");
+  list.innerHTML = "";
+  data.forEach(p => {
+    list.innerHTML += `<li><b>${p.user}:</b> ${p.content}</li>`;
+  });
+}
+</script>
+
+</body>
+</html>
